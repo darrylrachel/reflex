@@ -19,7 +19,12 @@ test('keyboard, reduced motion, live scene colors and resizing', async ({ page }
   const before = await page.locator('#scene canvas').screenshot(); await page.waitForTimeout(150); expect(await page.locator('#scene canvas').screenshot()).toEqual(before);
   await page.keyboard.press('Space'); await expect(page.locator('#stage')).toHaveAttribute('data-state','waiting'); const red = await page.locator('#scene canvas').screenshot(); expect(red.equals(before)).toBe(false);
   await expect(page.locator('#stage')).toHaveAttribute('data-state','ready',{timeout:7000}); const green = await page.locator('#scene canvas').screenshot(); expect(green.equals(red)).toBe(false); await page.keyboard.press('Space'); await expect(page.locator('#attempts')).toHaveText('1');
-  await page.setViewportSize({width:390,height:844}); await expect(page.locator('#scene canvas')).toBeVisible(); const bounds=await page.locator('#scene canvas').boundingBox(); expect(bounds.width).toBeLessThan(390); expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await page.setViewportSize({width:390,height:844});
+  const canvas = page.locator('#scene canvas');
+  await expect(canvas).toBeVisible();
+  // ResizeObserver updates the renderer asynchronously after layout.
+  await expect.poll(async () => (await canvas.boundingBox())?.width ?? Infinity).toBeLessThan(390);
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 test('touch and non-WebGL fallback remain playable with blocked storage', async ({ browser }) => {
   const context = await browser.newContext({viewport:{width:375,height:812},hasTouch:true,isMobile:true}); const page=await context.newPage();
