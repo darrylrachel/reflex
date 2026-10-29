@@ -6,15 +6,24 @@ const copy = {
   completed: ['REACTION RECORDED', '', '', 'Play again', 'TEST COMPLETE'],
   interrupted: ['ROUND PAUSED', 'Let’s refocus.', 'The tab lost focus. Start a fresh test.', 'Try again', 'TEST INTERRUPTED'],
 };
+// Match the displayed whole-millisecond result so the label never contradicts it.
+// These are game reference bands, not a measured population average.
+export function reactionRating(result) {
+  const milliseconds = Math.round(result);
+  if (milliseconds < 200) return { label: 'Above average', feedback: 'Under 200 ms. Lightning quick.' };
+  if (milliseconds <= 300) return { label: 'Average', feedback: '200–300 ms. Keep finding your rhythm.' };
+  return { label: 'Below average', feedback: 'Over 300 ms. Take a breath and try again.' };
+}
 export function createInterface(doc = document) {
   const el = id => doc.getElementById(id);
   return {
     render({ state, result }) {
       const [kicker, title, detail, action, label] = copy[state];
+      const rating = state === 'completed' ? reactionRating(result) : null;
       el('stage').dataset.state = state; el('state-label').textContent = label;
-      el('status-kicker').textContent = kicker;
+      el('status-kicker').textContent = rating ? `${rating.label} · Game speed rating` : kicker;
       el('status-title').textContent = state === 'completed' ? `${Math.round(result)} ms` : title;
-      el('status-detail').textContent = state === 'completed' ? (result < 200 ? 'Lightning quick. A moment well caught.' : result < 300 ? 'Sharp instincts. Keep finding your rhythm.' : 'A solid start. Take a breath and try again.') : detail;
+      el('status-detail').textContent = rating ? rating.feedback : detail;
       el('action').textContent = `${action} ↗`;
       el('action').disabled = state === 'waiting';
       el('hit').setAttribute('aria-label', state === 'waiting' ? 'Waiting. Do not react yet' : state === 'ready' ? 'React now' : 'Reaction area. Start a round');

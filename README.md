@@ -22,6 +22,8 @@ Open the local address printed by Vite. Run `npm run build` to generate `dist/`;
 
 Early input ends the round without recording it. Switching away from the window interrupts an active round so hidden-tab delays do not affect statistics. Reset statistics opens a confirmation dialog; cancel keeps your data.
 
+Completed tests also show a **game speed rating**: **Above average** below 200 ms, **Average** from 200–300 ms inclusive, and **Below average** above 300 ms. Faster reactions receive higher ratings. Ratings use the displayed rounded millisecond result. These fixed reference bands are game feedback, not a scientific population benchmark or a comparison with your saved personal average.
+
 ## Architecture and project structure
 
 ```text
